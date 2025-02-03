@@ -112,7 +112,7 @@ def create_query(latest_request_submission_time):  # pylint: disable=W0621
 
 
 # URL for the GraphQL endpoint
-URL = "https://api.goldsky.com/api/public/project_cm5y7hx91t6zd01vzfnfchtf9/subgraphs/legacy-curate-gnosis/v1.1.4/gn"  # pylint: disable=line-too-long
+URL = "https://gateway.thegraph.com/api/73380b22a17017c081123ec9c0e34677/subgraphs/id/9hHo5MpjpC1JqfD3BsgFnojGurXRHTrHWcUcZPPCo6m8"  # pylint: disable=line-too-long
 
 # Fetch all data with pagination
 all_query_results = []

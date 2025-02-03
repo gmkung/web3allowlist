@@ -46,6 +46,23 @@
       {
         "address": "0xa937e1aa4a7d7cd3800de25632765b045ff3a1f1"
       }
+    ],
+    "base": [
+      {
+        "address": "0x94afee2655db1bfca82e72082a3f14b3e411da26"
+      },
+      {
+        "address": "0x8a8a77469b2af43f0f000a71d4906bd3faf0e902"
+      },
+      {
+        "address": "0x38aebd5ad1b71374cc59f5f1271c29e3cfb62caa"
+      },
+      {
+        "address": "0x4d3144b5a428abf390b9adfee4b9ebfb934e7788"
+      },
+      {
+        "address": "0x777d15db625635b1df1c8caec5c815ffebf1537b"
+      }
     ]
   }
 }

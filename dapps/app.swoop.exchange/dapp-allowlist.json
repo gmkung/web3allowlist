@@ -13,6 +13,16 @@
       {
         "address": "0x6088d94c5a40cecd3ae2d4e0710ca687b91c61d0"
       }
+    ],
+    "zksync": [
+      {
+        "address": "0x36a1acbbcafca2468b85011ddd16e7cb4d673230"
+      }
+    ],
+    "optimism": [
+      {
+        "address": "0x0000000000001ff3684f28c67538d4d072c22734"
+      }
     ]
   }
 }

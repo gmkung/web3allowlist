@@ -15,6 +15,14 @@
     "arbitrum": [
       {
         "address": "0x78c1b41b825f89fae4736878fa63752f8d789bd6"
+      },
+      {
+        "address": "0x6d6ba570bb02f95aaf1c6e6ec1acc2119e2e9a76"
+      }
+    ],
+    "optimism": [
+      {
+        "address": "0xc26952f027f6884391f8c43cae5cca375c85e262"
       }
     ]
   }

@@ -1,8 +1,8 @@
-name: Sync Kleros Allowlist Weekly
+name: Sync Kleros Allowlist Monthly
 
 on:
     schedule:
-        - cron: "0 9 * * 1"
+        - cron: "0 9 1 * *"
     workflow_dispatch:
 
 env:
@@ -62,7 +62,8 @@ jobs:
             - name: Check for changes
               id: check_changes
               run: |
-                  git add dapps/ PR_comments.txt Kleros_update_logs.txt 2>/dev/null || true
+                  # Only stage dapps/ directory changes (excludes fork-specific and ignored files)
+                  git add dapps/ 2>/dev/null || true
                   if git diff --staged --quiet; then
                     echo "has_changes=false" >> $GITHUB_OUTPUT
                   else

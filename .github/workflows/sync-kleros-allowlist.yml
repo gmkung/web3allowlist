@@ -76,10 +76,22 @@ jobs:
                   GH_TOKEN: ${{ secrets.WEB3ALLOWLIST_PAT }}
               run: |
                   TODAY=$(date +"%d %B %Y")
-                  git commit -m "Monthly auto-sync: Kleros CDN allowlist updates till $TODAY"
                   BRANCH_NAME="kleros-sync-$(date +%Y%m%d-%H%M%S)"
-                  git checkout -b $BRANCH_NAME
-                  git push origin $BRANCH_NAME
+
+                  # Stash the current changes
+                  git stash push -m "Allowlist updates for PR"
+
+                  # Create branch from upstream/main (clean base without fork-specific files)
+                  git fetch upstream
+                  git checkout -b $BRANCH_NAME upstream/main
+
+                  # Apply only the allowlist changes
+                  git stash pop
+                  git add dapps/
+                  git commit -m "Monthly auto-sync: Kleros CDN allowlist updates till $TODAY"
+
+                  # Push to fork and create PR
+                  git push -f https://x-access-token:${{ secrets.WEB3ALLOWLIST_PAT }}@github.com/gmkung/web3allowlist.git $BRANCH_NAME
                   PR_BODY=$(cat PR_comments.txt 2>/dev/null || echo "Automated sync from Kleros CDN registry")
                   gh pr create --repo LedgerHQ/web3allowlist --title "Monthly auto-sync: Kleros CDN allowlist updates till $TODAY" --body "$PR_BODY" --head gmkung:$BRANCH_NAME --base main
                   echo "✅ PR created: $BRANCH_NAME"

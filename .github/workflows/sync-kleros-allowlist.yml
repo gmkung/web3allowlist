@@ -35,13 +35,17 @@ jobs:
                   git config --global user.name "github-actions[bot]"
                   git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-            - name: Add upstream remote
-              run: git remote add upstream https://github.com/LedgerHQ/web3allowlist.git || true
-
-            - name: Fetch latest dapps/ from upstream
+            - name: Add upstream remote and create PR branch
+              env:
+                  GH_TOKEN: ${{ secrets.WEB3ALLOWLIST_PAT }}
               run: |
+                  TODAY=$(date +"%d %B %Y")
+                  BRANCH_NAME="kleros-sync-$(date +%Y%m%d-%H%M%S)"
+
+                  # Add upstream remote and create clean branch from it
+                  git remote add upstream https://github.com/LedgerHQ/web3allowlist.git || true
                   git fetch upstream
-                  git checkout upstream/main -- dapps/
+                  git checkout -b $BRANCH_NAME upstream/main
 
             - name: Run Kleros sync script
               run: python kleros_cdn_to_github.py
@@ -56,23 +60,15 @@ jobs:
                   GH_TOKEN: ${{ secrets.WEB3ALLOWLIST_PAT }}
               run: |
                   TODAY=$(date +"%d %B %Y")
-                  BRANCH_NAME="kleros-sync-$(date +%Y%m%d-%H%M%S)"
+                  BRANCH_NAME=$(git branch --show-current)
 
                   # Check if there are changes in dapps/
-                  if git diff --quiet dapps/; then
+                  if git diff --quiet dapps/ && git diff --cached --quiet dapps/; then
                     echo "No changes detected in dapps/ directory. Skipping PR creation."
                     exit 0
                   fi
 
-                  # Stash the current changes
-                  git stash push -m "Allowlist updates for PR"
-
-                  # Create branch from upstream/main (clean base without fork-specific files)
-                  git fetch upstream
-                  git checkout -b $BRANCH_NAME upstream/main
-
-                  # Apply only the allowlist changes
-                  git stash pop
+                  # Commit the changes
                   git add dapps/
                   git commit -m "Monthly auto-sync: Kleros CDN allowlist updates till $TODAY"
 

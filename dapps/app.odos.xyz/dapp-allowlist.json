@@ -37,6 +37,9 @@
     "arbitrum": [
       {
         "address": "0xa669e7a0d4b3e4fa48af2de86bd4cd7126be4e13"
+      },
+      {
+        "address": "0x0d05a7d3448512b78fa8a9e46c4872c88c4a0d05"
       }
     ],
     "zksync": [
@@ -47,11 +50,19 @@
     "base": [
       {
         "address": "0x19ceead7105607cd444f5ad10dd51356436095a1"
+      },
+      {
+        "address": "0x0d05a7d3448512b78fa8a9e46c4872c88c4a0d05"
       }
     ],
     "scroll": [
       {
         "address": "0xbfe03c9e20a9fc0b37de01a172f207004935e0b1"
+      }
+    ],
+    "linea": [
+      {
+        "address": "0x0d05a7d3448512b78fa8a9e46c4872c88c4a0d05"
       }
     ]
   }

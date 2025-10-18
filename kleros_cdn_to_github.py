@@ -182,7 +182,7 @@ def create_query(latest_request_submission_time):  # pylint: disable=W0621
 
 # URL for the GraphQL endpoint
 if USE_ENVIO:
-    URL = "https://indexer.hyperindex.xyz/ca4efc9/v1/graphql"
+    URL = "https://indexer.hyperindex.xyz/1a2f51c/v1/graphql"
     print(f"Envio endpoint: {URL}")
 else:
     URL = f"https://gateway.thegraph.com/api/{os.getenv('THE_GRAPH_API_KEY')}/subgraphs/id/9hHo5MpjpC1JqfD3BsgFnojGurXRHTrHWcUcZPPCo6m8"  # pylint: disable=line-too-long # noqa: E501

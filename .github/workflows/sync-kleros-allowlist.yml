@@ -1,110 +1,83 @@
 name: Sync Kleros Allowlist Weekly
 
 on:
-  schedule:
-    # Run every Monday at 9:00 AM UTC
-    - cron: "0 9 * * 1"
-  workflow_dispatch: # Allow manual trigger
+    schedule:
+        - cron: "0 9 * * 1"
+    workflow_dispatch:
 
 env:
-  # Fork-specific files that stay ONLY in this fork
-  FORK_FILES: "kleros_cdn_to_github.py .gitattributes .github/workflows/sync-kleros-allowlist.yml"
+    FORK_FILES: "kleros_cdn_to_github.py .gitattributes .github/workflows/sync-kleros-allowlist.yml"
 
 jobs:
-  sync-and-create-pr:
-    runs-on: ubuntu-latest
+    sync-and-create-pr:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout fork repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
+        steps:
+            - name: Checkout fork repository
+              uses: actions/checkout@v4
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-          cache: "pip"
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.13"
+                  cache: "pip"
 
-      - name: Install Python dependencies
-        run: pip install -r requirements.txt
+            - name: Install Python dependencies
+              run: pip install -r requirements.txt
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
 
-      - name: Configure Git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            - name: Configure Git
+              run: |
+                  git config --global user.name "github-actions[bot]"
+                  git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Sync with upstream (preserving fork-specific files)
-        run: |
-          # Backup fork-specific files (preserve directory structure)
-          for file in $FORK_FILES; do
-            mkdir -p "/tmp/fork-backup/$(dirname $file)"
-            cp "$file" "/tmp/fork-backup/$file"
-          done
+            - name: Sync with upstream (preserving fork-specific files)
+              run: |
+                  for file in $FORK_FILES; do
+                    mkdir -p "/tmp/fork-backup/$(dirname $file)"
+                    cp "$file" "/tmp/fork-backup/$file"
+                  done
+                  git remote add upstream https://github.com/LedgerHQ/web3allowlist.git || true
+                  git fetch upstream
+                  git merge upstream/main --no-edit || echo "Already up to date"
+                  for file in $FORK_FILES; do
+                    cp "/tmp/fork-backup/$file" "$file"
+                  done
 
-          # Sync from upstream
-          git remote add upstream https://github.com/LedgerHQ/web3allowlist.git || true
-          git fetch upstream
-          git merge upstream/main --no-edit || echo "Already up to date"
+            - name: Run Kleros sync script
+              run: python kleros_cdn_to_github.py
+              env:
+                  PYTHONUNBUFFERED: 1
 
-          # Restore fork-specific files
-          for file in $FORK_FILES; do
-            cp "/tmp/fork-backup/$file" "$file"
-          done
-          echo "✅ Fork-specific files preserved"
+            - name: Format JSON files with Prettier
+              run: npx prettier --write "**/*.json"
 
-      - name: Run Kleros sync script
-        run: python kleros_cdn_to_github.py
-        env:
-          PYTHONUNBUFFERED: 1
+            - name: Check for changes
+              id: check_changes
+              run: |
+                  git add dapps/ PR_comments.txt Kleros_update_logs.txt 2>/dev/null || true
+                  if git diff --staged --quiet; then
+                    echo "has_changes=false" >> $GITHUB_OUTPUT
+                  else
+                    echo "has_changes=true" >> $GITHUB_OUTPUT
+                  fi
 
-      - name: Format JSON files with Prettier
-        run: npx prettier --write "**/*.json"
-
-      - name: Check for changes
-        id: check_changes
-        run: |
-          # Stage only dapp data changes (exclude fork-specific files)
-          git add dapps/ PR_comments.txt Kleros_update_logs.txt 2>/dev/null || true
-          
-          if git diff --staged --quiet; then
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "ℹ️ No changes - allowlist is up to date"
-          else
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-            echo "✅ Changes detected - $(git diff --staged --name-only | wc -l) files modified"
-          fi
-
-      - name: Create PR to upstream
-        if: steps.check_changes.outputs.has_changes == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Commit changes
-          git commit -m "chore: sync allowlist from Kleros CDN registry"
-          
-          # Create and push branch
-          BRANCH_NAME="kleros-sync-$(date +%Y%m%d-%H%M%S)"
-          git checkout -b $BRANCH_NAME
-          git push origin $BRANCH_NAME
-          
-          # Read PR description
-          PR_BODY=$(cat PR_comments.txt 2>/dev/null || echo "Automated sync from Kleros CDN registry")
-          
-          # Create PR to upstream
-          gh pr create \
-            --repo LedgerHQ/web3allowlist \
-            --title "chore: sync allowlist from Kleros CDN registry" \
-            --body "$PR_BODY" \
-            --head gmkung:$BRANCH_NAME \
-            --base main
-          
-          echo "✅ PR created: $BRANCH_NAME"
-          echo "📝 Summary:" && cat PR_comments.txt
-
+            - name: Create PR to upstream
+              if: steps.check_changes.outputs.has_changes == 'true'
+              env:
+                  GH_TOKEN: ${{ secrets.WEB3ALLOWLIST_PAT }}
+              run: |
+                  git commit -m "chore: sync allowlist from Kleros CDN registry"
+                  BRANCH_NAME="kleros-sync-$(date +%Y%m%d-%H%M%S)"
+                  git checkout -b $BRANCH_NAME
+                  git push origin $BRANCH_NAME
+                  PR_BODY=$(cat PR_comments.txt 2>/dev/null || echo "Automated sync from Kleros CDN registry")
+                  gh pr create --repo LedgerHQ/web3allowlist --title "chore: sync allowlist from Kleros CDN registry" --body "$PR_BODY" --head gmkung:$BRANCH_NAME --base main
+                  echo "✅ PR created: $BRANCH_NAME"

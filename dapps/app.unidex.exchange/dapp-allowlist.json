@@ -105,6 +105,12 @@
       },
       {
         "address": "0xdef1c0ded9bec7f1a1670819833240f027b25eff"
+      },
+      {
+        "address": "0xa6e941eab67569ca4522f70d343714ff51d571c4"
+      },
+      {
+        "address": "0xd07c4f45bc9b389d286cb094f97bb6ba45f4bb30"
       }
     ],
     "fantom": [
@@ -151,6 +157,15 @@
       },
       {
         "address": "0xbeb09000fa59627dc02bb55448ac1893eaa501a5"
+      },
+      {
+        "address": "0x69716e51e3f8bec9c3d4e1bb46396384ae11c594"
+      },
+      {
+        "address": "0x80a5a825b8bb07e355244a7de6384a064b0d601d"
+      },
+      {
+        "address": "0x552fcecc218158fff20e505c8f3ad24f8e1dd33c"
       }
     ],
     "zksync": [

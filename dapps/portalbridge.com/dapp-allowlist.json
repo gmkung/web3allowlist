@@ -7,6 +7,9 @@
     "ethereum": [
       {
         "address": "0x3ee18b2214aff97000d974cf647e7c347e8fa585"
+      },
+      {
+        "address": "0x87a26566dbb3bf206634c1792a96ff4989e3f56e"
       }
     ],
     "avalanche": [

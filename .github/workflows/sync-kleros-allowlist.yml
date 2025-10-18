@@ -42,10 +42,26 @@ jobs:
                   TODAY=$(date +"%d %B %Y")
                   BRANCH_NAME="kleros-sync-$(date +%Y%m%d-%H%M%S)"
 
+                  # Backup files needed to run the sync script
+                  SCRIPT_FILES="kleros_cdn_to_github.py requirements.txt"
+                  mkdir -p /tmp/fork-backup
+                  for file in $SCRIPT_FILES; do
+                    if [ -f "$file" ]; then
+                      cp "$file" "/tmp/fork-backup/$file"
+                    fi
+                  done
+
                   # Add upstream remote and create clean branch from it
                   git remote add upstream https://github.com/LedgerHQ/web3allowlist.git || true
                   git fetch upstream
                   git checkout -b $BRANCH_NAME upstream/main
+
+                  # Restore script files needed to run sync
+                  for file in $SCRIPT_FILES; do
+                    if [ -f "/tmp/fork-backup/$file" ]; then
+                      cp "/tmp/fork-backup/$file" "$file"
+                    fi
+                  done
 
             - name: Run Kleros sync script
               run: python kleros_cdn_to_github.py

@@ -5,9 +5,6 @@ on:
         - cron: "0 9 1 * *"
     workflow_dispatch:
 
-env:
-    FORK_FILES: "kleros_cdn_to_github.py .gitattributes .github/workflows/sync-kleros-allowlist.yml"
-
 jobs:
     sync-and-create-pr:
         runs-on: ubuntu-latest
@@ -38,18 +35,13 @@ jobs:
                   git config --global user.name "github-actions[bot]"
                   git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-            - name: Sync with upstream (preserving fork-specific files)
+            - name: Add upstream remote
+              run: git remote add upstream https://github.com/LedgerHQ/web3allowlist.git || true
+
+            - name: Fetch latest dapps/ from upstream
               run: |
-                  for file in $FORK_FILES; do
-                    mkdir -p "/tmp/fork-backup/$(dirname $file)"
-                    cp "$file" "/tmp/fork-backup/$file"
-                  done
-                  git remote add upstream https://github.com/LedgerHQ/web3allowlist.git || true
                   git fetch upstream
-                  git merge upstream/main --no-edit || echo "Already up to date"
-                  for file in $FORK_FILES; do
-                    cp "/tmp/fork-backup/$file" "$file"
-                  done
+                  git checkout upstream/main -- dapps/
 
             - name: Run Kleros sync script
               run: python kleros_cdn_to_github.py
@@ -59,24 +51,18 @@ jobs:
             - name: Format JSON files with Prettier
               run: npx prettier --write "**/*.json"
 
-            - name: Check for changes
-              id: check_changes
-              run: |
-                  # Only stage dapps/ directory changes (excludes fork-specific and ignored files)
-                  git add dapps/ 2>/dev/null || true
-                  if git diff --staged --quiet; then
-                    echo "has_changes=false" >> $GITHUB_OUTPUT
-                  else
-                    echo "has_changes=true" >> $GITHUB_OUTPUT
-                  fi
-
             - name: Create PR to upstream
-              if: steps.check_changes.outputs.has_changes == 'true'
               env:
                   GH_TOKEN: ${{ secrets.WEB3ALLOWLIST_PAT }}
               run: |
                   TODAY=$(date +"%d %B %Y")
                   BRANCH_NAME="kleros-sync-$(date +%Y%m%d-%H%M%S)"
+
+                  # Check if there are changes in dapps/
+                  if git diff --quiet dapps/; then
+                    echo "No changes detected in dapps/ directory. Skipping PR creation."
+                    exit 0
+                  fi
 
                   # Stash the current changes
                   git stash push -m "Allowlist updates for PR"

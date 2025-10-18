@@ -78,14 +78,14 @@ jobs:
                   TODAY=$(date +"%d %B %Y")
                   BRANCH_NAME=$(git branch --show-current)
 
-                  # Check if there are changes in dapps/
-                  if git diff --quiet dapps/ && git diff --cached --quiet dapps/; then
-                    echo "No changes detected in dapps/ directory. Skipping PR creation."
+                  # Check if there are any changes to commit
+                  git add dapps/ kleros_cdn_to_github.py requirements.txt
+                  if git diff --cached --quiet; then
+                    echo "No changes detected. Skipping PR creation."
                     exit 0
                   fi
 
-                  # Commit the changes
-                  git add dapps/
+                  # Commit all changes (allowlist updates + script improvements)
                   git commit -m "Monthly auto-sync: Kleros CDN allowlist updates till $TODAY"
 
                   # Push to fork and create PR

@@ -282,6 +282,17 @@
       {
         "address": "0x3a23f943181408eac424116af7b7790c94cb97a5"
       }
+    ],
+    "linea": [
+      {
+        "address": "0x6131b5fae19ea4f9d964eac0408e4408b66337b5"
+      },
+      {
+        "address": "0x2234b1f73847f5c26cd7a967256b6ae9beb1a4b1"
+      },
+      {
+        "address": "0x2d8879046f1559e53eb052e949e9544bcb72f414"
+      }
     ]
   }
 }

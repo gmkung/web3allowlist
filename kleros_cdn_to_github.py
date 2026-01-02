@@ -343,6 +343,27 @@ with open("Kleros_update_logs.txt", "w", encoding="utf-8") as log_file:
         log_file.write(log_entry + "\n")
 
 
+# Helper function to truncate long lists
+def format_list_with_truncation(items, limit=100):
+    """
+    Format a list of items, truncating after 'limit' items with a message.
+
+    Args:
+        items (set or list): The items to format
+        limit (int): Maximum number of items to show (default: 100)
+
+    Returns:
+        str: Formatted string with items, truncated if needed
+    """
+    items_list = sorted(list(items))  # Convert to sorted list for consistent output
+    if len(items_list) <= limit:
+        return ', '.join(items_list)
+    else:
+        displayed_items = ', '.join(items_list[:limit])
+        remaining_count = len(items_list) - limit
+        return f"{displayed_items}... and {remaining_count} more contracts"
+
+
 # Get the current date and time
 
 current_datetime = datetime.now(timezone.utc).strftime("%d/%m/%Y %H:%M")
@@ -351,13 +372,13 @@ summary = f"""## Changes
 
 - Dapp(s)
 
-  - added : {', '.join(added_domains)}
+  - added : {format_list_with_truncation(added_domains, 100)}
   - removed : ...
-  - updated : {', '.join(updated_domains)}
+  - updated : {format_list_with_truncation(updated_domains, 100)}
 
 - Contract(s)
 
-  - added : {', '.join(added_contracts)}
+  - added : {format_list_with_truncation(added_contracts, 100)}
   - removed : ...
   - updated : ...
 

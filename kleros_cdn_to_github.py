@@ -37,6 +37,10 @@ from datetime import datetime, timezone
 import requests  # pylint: disable=import-error
 from dotenv import load_dotenv  # pylint: disable=import-error
 
+# Script version for tracking
+SCRIPT_VERSION = "1.1.0-truncation"
+print(f"=== Running kleros_cdn_to_github.py version: {SCRIPT_VERSION} ===")
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -356,12 +360,17 @@ def format_list_with_truncation(items, limit=100):
         str: Formatted string with items, truncated if needed
     """
     items_list = sorted(list(items))  # Convert to sorted list for consistent output
-    if len(items_list) <= limit:
+    total_count = len(items_list)
+    print(f"[TRUNCATION] Processing {total_count} items with limit {limit}")
+
+    if total_count <= limit:
+        print(f"[TRUNCATION] No truncation needed ({total_count} <= {limit})")
         return ', '.join(items_list)
-    else:
-        displayed_items = ', '.join(items_list[:limit])
-        remaining_count = len(items_list) - limit
-        return f"{displayed_items}... and {remaining_count} more contracts"
+
+    displayed_items = ', '.join(items_list[:limit])
+    remaining_count = total_count - limit
+    print(f"[TRUNCATION] Truncated: showing {limit}, hiding {remaining_count}")
+    return f"{displayed_items}... and {remaining_count} more contracts"
 
 
 # Get the current date and time

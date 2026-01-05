@@ -286,12 +286,20 @@ for item in all_query_results:
         # Handle different data structures
         if USE_ENVIO:
             # Envio: keys are at the top level
-            domain = item["key1"].strip()
-            eip_155_info = item["key0"].split(":")
+            key1 = item.get("key1")
+            key0 = item.get("key0")
         else:
             # The Graph: keys are nested under metadata
-            domain = item["metadata"]["key1"].strip()
-            eip_155_info = item["metadata"]["key0"].split(":")
+            metadata = item.get("metadata", {})
+            key1 = metadata.get("key1")
+            key0 = metadata.get("key0")
+
+        # Skip items with missing required fields
+        if not key1 or not key0:
+            continue
+
+        domain = key1.strip()
+        eip_155_info = key0.split(":")
 
         # remove www. subdomain as per Ledger's requirements
         if domain.startswith("www."):

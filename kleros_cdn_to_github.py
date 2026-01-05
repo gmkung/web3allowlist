@@ -79,6 +79,32 @@ def deduce_website_name(raw_domain):
     return website_name
 
 
+# Helper function to truncate long lists
+def format_list_with_truncation(items, limit=100):
+    """
+    Format a list of items, truncating after 'limit' items with a message.
+
+    Args:
+        items (set or list): The items to format
+        limit (int): Maximum number of items to show (default: 100)
+
+    Returns:
+        str: Formatted string with items, truncated if needed
+    """
+    items_list = sorted(list(items))  # Convert to sorted list for consistent output
+    total_count = len(items_list)
+    print(f"[TRUNCATION] Processing {total_count} items with limit {limit}")
+
+    if total_count <= limit:
+        print(f"[TRUNCATION] No truncation needed ({total_count} <= {limit})")
+        return ", ".join(items_list)
+
+    displayed_items = ", ".join(items_list[:limit])
+    remaining_count = total_count - limit
+    print(f"[TRUNCATION] Truncated: showing {limit}, hiding {remaining_count}")
+    return f"{displayed_items}... and {remaining_count} more contracts"
+
+
 # Helper function to send the GraphQL query
 
 
@@ -345,33 +371,6 @@ for domain, chains in domain_address_map.items():
 with open("Kleros_update_logs.txt", "w", encoding="utf-8") as log_file:
     for log_entry in log_entries:
         log_file.write(log_entry + "\n")
-
-
-# Helper function to truncate long lists
-def format_list_with_truncation(items, limit=100):
-    """
-    Format a list of items, truncating after 'limit' items with a message.
-
-    Args:
-        items (set or list): The items to format
-        limit (int): Maximum number of items to show (default: 100)
-
-    Returns:
-        str: Formatted string with items, truncated if needed
-    """
-    items_list = sorted(list(items))  # Convert to sorted list for consistent output
-    total_count = len(items_list)
-    print(f"[TRUNCATION] Processing {total_count} items with limit {limit}")
-
-    if total_count <= limit:
-        print(f"[TRUNCATION] No truncation needed ({total_count} <= {limit})")
-        return ', '.join(items_list)
-
-    displayed_items = ', '.join(items_list[:limit])
-    remaining_count = total_count - limit
-    print(f"[TRUNCATION] Truncated: showing {limit}, hiding {remaining_count}")
-    return f"{displayed_items}... and {remaining_count} more contracts"
-
 
 # Get the current date and time
 

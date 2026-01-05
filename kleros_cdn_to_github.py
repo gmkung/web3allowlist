@@ -91,17 +91,20 @@ def format_list_with_truncation(items, limit=100):
     Returns:
         str: Formatted string with items, truncated if needed
     """
-    items_list = sorted(list(items))  # Convert to sorted list for consistent output
+    # Convert to sorted list for consistent output
+    items_list = sorted(list(items))
     total_count = len(items_list)
     print(f"[TRUNCATION] Processing {total_count} items with limit {limit}")
 
     if total_count <= limit:
-        print(f"[TRUNCATION] No truncation needed ({total_count} <= {limit})")
+        msg = f"[TRUNCATION] No truncation needed ({total_count} <= {limit})"
+        print(msg)
         return ", ".join(items_list)
 
     displayed_items = ", ".join(items_list[:limit])
     remaining_count = total_count - limit
-    print(f"[TRUNCATION] Truncated: showing {limit}, hiding {remaining_count}")
+    msg = f"[TRUNCATION] Truncated: showing {limit}, hiding {remaining_count}"
+    print(msg)
     return f"{displayed_items}... and {remaining_count} more contracts"
 
 
@@ -172,10 +175,14 @@ def create_query(latest_request_submission_time):  # pylint: disable=W0621
                 limit: 1000,
                 order_by: {{latestRequestSubmissionTime: asc}},
                 where: {{
-                    registryAddress: {{_eq: "0x957a53a994860be4750810131d9c876b2f52d6e1"}},
+                    registryAddress: {{
+                        _eq: "0x957a53a994860be4750810131d9c876b2f52d6e1"
+                    }},
                     status: {{_eq: "Registered"}},
                     disputed: {{_eq: false}},
-                    latestRequestSubmissionTime: {{_gt: {latest_request_submission_time if latest_request_submission_time else 0}}}
+                    latestRequestSubmissionTime: {{
+                        _gt: {latest_request_submission_time or 0}
+                    }}
                 }}
             ) {{
                 itemID
@@ -186,17 +193,19 @@ def create_query(latest_request_submission_time):  # pylint: disable=W0621
             }}
         }}
         """
-    else:
-        # The Graph query format
-        return f"""
+    # The Graph query format
+    return f"""
         {{
-            litems(first: 1000, orderBy: latestRequestSubmissionTime,
-            orderDirection:asc, where: {{
+            litems(
+                first: 1000,
+                orderBy: latestRequestSubmissionTime,
+                orderDirection:asc,
+                where: {{
                 registry: "0x957a53a994860be4750810131d9c876b2f52d6e1",
                 status_in: [Registered],
                 disputed: false,
-                latestRequestSubmissionTime_gt:
-                 {latest_request_submission_time if latest_request_submission_time else 0}
+                latestRequestSubmissionTime_gt: \
+{latest_request_submission_time or 0}
             }}) {{
                 itemID
                 latestRequestSubmissionTime
@@ -328,7 +337,7 @@ for domain, chains in domain_address_map.items():
 
         added_domains.add(domain)
 
-    FILE_ACTION = "Appended" if os.path.exists(allowlist_file_path) else "New file"
+    file_action = "Appended" if os.path.exists(allowlist_file_path) else "New file"
 
     if os.path.exists(allowlist_file_path):
         with open(allowlist_file_path, "r", encoding="utf-8") as allowlist_file:
@@ -360,9 +369,10 @@ for domain, chains in domain_address_map.items():
 
                 added_contracts.add(f"{domain}:{chain}:{address}")
 
-                log_entries.append(
-                    f"{allowlist_file_path} ->> {address} ({chain}) ({FILE_ACTION})"
+                log_entry = (
+                    f"{allowlist_file_path} ->> " f"{address} ({chain}) ({file_action})"
                 )
+                log_entries.append(log_entry)
 
     with open(allowlist_file_path, "w", encoding="utf-8") as allowlist_file:
         json.dump(allowlist_data, allowlist_file, indent=2)
@@ -392,9 +402,9 @@ summary = f"""## Changes
 
 ## Reason
 Adding {len(added_domains)} new domains and {len(added_contracts)} new \
-dapp->chain->contract entries from the Ledger CDN registry on \
-Kleros Curate (https://curate.kleros.io/tcr/100/0x957a53a994860be4750810131d9c876b2f52d6e1?registered=true) \
-up till {current_datetime} UTC.
+dapp->chain->contract entries from the Ledger CDN registry on Kleros Curate \
+(https://curate.kleros.io/tcr/100/0x957a53a994860be4750810131d9c876b2f52d6e1\
+?registered=true) up till {current_datetime} UTC.
 """
 
 with open("PR_comments.txt", "w", encoding="utf-8") as log_file:
